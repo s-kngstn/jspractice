@@ -18,7 +18,7 @@ function fizzBuzz(){
         }
 
         count++;
-        console.log(output);
     }
 
+        console.log(output);
 }
