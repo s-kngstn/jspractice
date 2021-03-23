@@ -35,7 +35,7 @@ app.post('/', function(req, res){
 
     const options = {
         method: "POST",
-        auth: "sk1:5721de8d90cdfd6182ce6aebdd346c9d-us",
+        auth: undefined,
     }
 
     const request = https.request(url, options, function(response){
@@ -64,7 +64,3 @@ app.post("/failure", function(req, res){
 app.listen(3000, function(){
     console.log("Server running on Port 3000...")
 });
-
-// API KEY = "5721de8d90cdfd6182ce6aebdd346c9d-us1"
-
-// Mailchimp List ID = "e5a65ba8c0"
