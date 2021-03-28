@@ -5,6 +5,7 @@ const app = express();
 
 //You need the urlencoded to write HTML items into this javascript
 app.use(express.urlencoded({extended: true}));
+//Use below to allow access to CSS and JS files from a folder named "public"
 app.use(express.static("public"));
 
 
