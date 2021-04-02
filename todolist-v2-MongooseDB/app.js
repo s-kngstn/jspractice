@@ -45,7 +45,7 @@ const defaultItems = [item1, item2, item3];
 
 app.get("/", function(_req, res) {
 
-  Item.find({}, function(err, foundItems){
+  Item.find({}, function(_err, foundItems){
     // console.log(foundItems);
     if (foundItems.length ===  0){
       // Putting your insertMany into this if statement prevents data repetition in the db
@@ -57,6 +57,7 @@ app.get("/", function(_req, res) {
           console.log("Default items saved to database.")
         }
       });
+      res.redirect("/"); 
     } else {
       res.render("list", {listTitle: "Today", newListItems: foundItems});
     }
@@ -66,13 +67,16 @@ app.get("/", function(_req, res) {
 
 app.post("/", function(req, res){
 
-  const item = req.body.newItem;
+  const item = new Item({
+    name: req.body.newItem,
+  });
 
   if (req.body.list === "Work") {
     workItems.push(item);
     res.redirect("/work");
   } else {
-    items.push(item);
+    //items.push(item);
+    item.save();
     res.redirect("/");
   }
 });
