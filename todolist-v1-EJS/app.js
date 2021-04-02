@@ -13,7 +13,7 @@ app.use(express.static("public"));
 // vv Tells our app using express to use ejs as its view engine
 app.set("view engine", "ejs");
 
-app.get("/", function(req, res){
+app.get("/", function(_req, res){
 
   const day = date.getDate();
 
@@ -35,11 +35,11 @@ app.post("/", function(req, res){
 
 });
 
-app.get("/work", function(req, res){
+app.get("/work", function(_req, res){
   res.render("list", {listTitle: "Work List", newListItems: workItems});
 });
 
-app.get("/about", function(req, res){
+app.get("/about", function(_req, res){
   res.render("about");
 });
 

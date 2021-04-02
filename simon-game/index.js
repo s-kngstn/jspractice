@@ -4,6 +4,7 @@ const buttonColors = ["red", "blue", "green", "yellow"];
 let level = 0;
 let gameStart = false;
 
+
 function playSound(name) {
     var audio = new Audio(`sounds/${name}.mp3`);
     audio.play();
