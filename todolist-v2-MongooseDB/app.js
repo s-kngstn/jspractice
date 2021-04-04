@@ -21,6 +21,8 @@ const depricationError = {
   useUnifiedTopology: true,
   useFindAndModify: false
 }
+
+// Local Connection Below
 mongoose.connect(`mongodb://localhost:27017/${dbName}`, depricationError);
 // 2. Create a new mongoose Schema.
 // Create Items Schema with one field of name which is data type string
@@ -143,14 +145,6 @@ app.get("/:customListName", function(req, res){
  
 });
 
-
-// app.get("/work", function(_req,res){
-//   res.render("list", {listTitle: "Work List", newListItems: workItems});
-// });
-
-// app.get("/about", function(_req, res){
-//   res.render("about");
-// });
 
 app.listen(3000, function() {
   console.log("Server started on port 3000");
