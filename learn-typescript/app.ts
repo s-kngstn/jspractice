@@ -1,48 +1,43 @@
-// const person: { <-- bad practice
-//   name: string,
-//   age: number,
-// } = {
+///////////////////////////////////////////////////////////////////////////////
+///////// Union Types  & Literal Types ///////////////////////////////////////
 
-// const person:{ <--- used if changing typescripts inference (e.g. adding tuple to object)
-//   name: string;
-//   age: number;
-//   hobbies: string[];
-//   role: [number, string];
-// } = {  // <-- good practice
-//   name: 'Sam',
-//   age: 35,
-//   hobbies: ['Cooking', 'Eating'],
-//   role: [2, 'author'],
-// };
+type Combinable = number | string; // <-- Type Aliases
+type ConversionDescriptor = 'as-number' | 'as-text';
 
-
-// const ADMIN = 0;
-// const READ_ONLY = 1;
-// const AUTHOR = 2;  
-
-enum Role { ADMIN, READ_ONLY, AUTHOR }; //<-- behind the scenes these will be assigned numbers 0, 1, 2, ... ,
-// enum Role { ADMIN = 5, READ_ONLY, AUTHOR }; // <-- would start at 5... 5, 6, 7, .. , ..
-// enum Role { ADMIN = 50, READ_ONLY = 100, AUTHOR = 33 }; // <-- custom assignment
-
-const person = {  // <-- good practice
-  name: 'Sam',
-  age: 35,
-  hobbies: ['Cooking', 'Eating'],
-  role: Role.ADMIN,
-};
-
-// person.role.push('admin');
-
-let favoriteActivites: string[];
-favoriteActivites = ['Ball'];
-
-console.log(person.name);
-
-for (const hobby of person.hobbies){
-  console.log(hobby.toUpperCase()); // <-- TS inference really shines here
-  // console.log(hobby.map()); // !!! ERROR !!!
+function combine(input1: Combinable, input2: Combinable, resultConversion: ConversionDescriptor){
+  let result;
+  if (typeof input1 === 'number' && typeof input2 === 'number' || resultConversion === 'as-number'){
+    result = +input1 + +input2;
+  } else {
+    result = input1.toString() + input2.toString();
+  }
+  return result;
+  // if (resultConversion === 'as-number'){
+  //   return +result;
+  // } else {
+  //   return result.toString();
+  // }
 }
 
-if (person.role === Role.ADMIN){
-  console.log('Is read only');
+
+const combinedAges = combine(30, 26, 'as-number');
+console.log(combinedAges);
+
+const combinedStringAges = combine('30', '26', 'as-number');
+console.log(combinedStringAges);
+
+const combinedNames = combine('Max', 'Anna', 'as-text');
+console.log(combinedNames);
+
+// Type aliases can be used to "create" your own types.
+// Youre not limited to storing union types though - you can also provide an alias
+// to a (possibly complex) object type.
+// For example:
+type User = { name: string; age: number };
+const u1: User = { name: 'Bill', age: 44};
+
+function greet(user: User){
+  console.log('Hey, I am ' + user.name);
 }
+
+console.log(greet(u1));
