@@ -1,7 +1,10 @@
 require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
-const encrypt = require("mongoose-encryption");
+const session = require("express-session");
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
+
 
 const app = express();
 
@@ -11,27 +14,47 @@ const app = express();
 app.use(express.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
+/// This block of code must always be placed between these two blocks //////
+
+app.use(session({
+  secret: process.env.SESSION_KEY,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ------------------------------------------------------------------ //////
+
 const depricationError = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
+  useCreateIndex: true,
 };
 mongoose.connect("mongodb://localhost:27017/userDB", depricationError);
 
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: true,
   },
   password: {
     type: String,
-    required: true,
-  }
+  },
+  secret: String 
 });
 
-userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
+// The below plugin will be used to hash and salt our passwords and save the information to our users
+// into our mongoDB 
+userSchema.plugin(passportLocalMongoose);
 
 const User = new mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.get("/", function(req, res){
   res.render("home");
@@ -45,36 +68,83 @@ app.get("/register", function(req, res){
   res.render("register");
 });
 
-app.post("/register", function(req, res){
-  const newUser = new User({
-    email: req.body.username,
-    password: req.body.password
-  });
-
-  newUser.save(function(err){
-    if(err){
-      console.log(err)
+app.get("/secrets", function(req, res){
+  User.find({"secret": {$ne: null}}, function(err, foundUsers){
+    if (err){
+      console.log(err);
     } else {
-      res.render("secrets");
+      if (foundUsers) {
+        res.render("secrets", {usersWithSecrets: foundUsers});
+      }
     }
   });
 });
 
-app.post("/login", function(req, res){
-  const username = req.body.username;
-  const password = req.body.password;
+app.get("/submit", function(req, res){
+  if (req.isAuthenticated()){
+    res.render("submit");
+  } else {
+    res.redirect("/login");
+  }
+});
 
-  User.findOne({email: username}, function(err, foundUser){
+app.post("/submit", function(req, res){
+  const submittedSecret = req.body.secret;
+
+  console.log(req.user.id);
+
+  User.findById(req.user.id, function(err, foundUser){
     if (err){
       console.log(err);
     } else {
       if (foundUser){
-        if (foundUser.password === password){
-          res.render("secrets");
-        }
+        foundUser.secret = submittedSecret;
+        foundUser.save(function(){
+          res.redirect("/secrets");
+        });
       }
     }
   });
+});
+
+app.get("/logout", function(req, res){
+  req.logout();
+  res.redirect("/");
+});
+//Update the code 
+
+app.post("/register", function(req, res){
+
+  User.register({username: req.body.username}, req.body.password, function(err, user){
+    if (err){
+      console.log(err);
+      res.redirect("/register");
+    } else {
+      passport.authenticate("local")(req, res, function(){
+        res.redirect("/secrets");
+      });
+    }
+  })
+  
+});
+
+app.post("/login", function(req, res){
+  
+ const user = new User({
+   username: req.body.username,
+   password: req.body.password
+ });
+
+ req.login(user, function(err){
+   if (err){
+     console.log(err);
+   } else {
+     passport.authenticate("local")(req, res, function(){
+       res.redirect("/secrets")
+     })
+   }
+ })
+  
 });
 
 
