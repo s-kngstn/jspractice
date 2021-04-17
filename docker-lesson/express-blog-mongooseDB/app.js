@@ -1,5 +1,4 @@
 const express = require("express");
-const { findLastKey } = require("lodash");
 const _ = require("lodash");
 const mongoose = require("mongoose");
 
@@ -12,7 +11,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-const dbName = "blogpostsDB";
+const dbName = "blog-posts";
 const depricationError = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -29,7 +28,7 @@ const postsSchema = new mongoose.Schema({
     required: true,
   }
 });
-const Post = mongoose.model("Post", postsSchema);
+const Post = mongoose.model("Posts", postsSchema);
 
 app.get("/", function(req, res){
   Post.find({}, function(_err, foundPosts){
