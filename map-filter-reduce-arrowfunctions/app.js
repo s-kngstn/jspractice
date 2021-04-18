@@ -31,6 +31,11 @@
 
 // /////////////////////// REDUCE ////////////////////////////////
 // //Reduce - Accumulate a value by doing something to each item in an array.
+// //THE REDUCE FUNCTION TAKES THE TOTAL AMOUNT OF AN ARRAY AND REDUCES IT DOWN TO A SINGLE SUM AMOUNT
+// const num = [1,2,3,5];
+// num.reduce(function(accumulator, currentNumber){
+//   return accumulator * currentNumber;
+// });
 // var newNum = numbers.reduce(function(accumulator, currentNumber){
 //   return accumulator + currentNumber;
 // })
