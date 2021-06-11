@@ -11,60 +11,88 @@ const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
 
-let map, mapEvent;
-// Using the Geolocation API to find the users current location
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(
-    function (position) {
-      const { latitude } = position.coords;
-      const { longitude } = position.coords;
+class App {
+  // map, and mapEvent are now private instance properties(variables of a class)
+  #map;
+  #mapEvent;
+  // The constructor method is always immediatley called once an object is made from this class.
+  // So Anything inside the constructor is also fired off once the object is created.
+  constructor() {
+    // Gets user position as soon as new App object is called
+    this._getPosition();
+    form.addEventListener("submit", this._newWorkout.bind(this));
+    // Toggles between input elevation and input cadence
+    inputType.addEventListener("change", this._toggleElevationField);
+  }
 
-      const home = [51.529337340565476, -0.10292490041692204];
+  _getPosition() {
+    // Using the Geolocation API to find the users current location
+    if (navigator.geolocation)
+      navigator.geolocation.getCurrentPosition(
+        this._loadMap.bind(this),
+        function () {
+          alert("Could not get your position");
+        }
+      );
+  }
 
-      console.log(`https://www.google.co.uk/maps/@${latitude},${longitude}`);
+  _loadMap(position) {
+    const { latitude } = position.coords;
+    const { longitude } = position.coords;
 
-      const coords = [latitude, longitude];
-      // Leaflet JS library
-      // The Second parameter inside setView is the zoom level of the map (1 = Far, 20 = Close)
-      map = L.map("map").setView(coords, 13);
-      // console.log(map)
+    const home = [51.529337340565476, -0.10292490041692204];
 
-      // This is the tile layer / map display, which can be customized to use other maps including googlemaps.
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(map);
+    console.log(`https://www.google.co.uk/maps/@${latitude},${longitude}`);
 
-      // This is the map marker that can mark a visible location for users on the map
-      L.marker(home)
-        .addTo(map)
-        .bindPopup("A pretty CSS3 popup.<br> Easily customizable.")
-        .openPopup();
+    const coords = [latitude, longitude];
+    // Leaflet JS library
+    // The Second parameter inside setView is the zoom level of the map (1 = Far, 20 = Close)
+    this.#map = L.map("map").setView(coords, 13);
+    // console.log(map)
 
-      // This is a Leaflet JS built-in event that triggers whenever you click on the map.
-      map.on("click", function (mapE) {
-        mapEvent = mapE
-        form.classList.remove("hidden");
-        inputDistance.focus();
-      });
-    },
-    function () {
-      alert("Could not get your position");
-    }
-  );
+    // This is the tile layer / map display, which can be customized to use other maps including googlemaps.
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(this.#map);
 
-  form.addEventListener("submit", function (e) {
+    // This is the map marker that can mark a visible location for users on the map
+    L.marker(home)
+      .addTo(this.#map)
+      .bindPopup("A pretty CSS3 popup.<br> Easily customizable.")
+      .openPopup();
+
+    // This is a Leaflet JS built-in event that triggers whenever you click on the map.
+    this.#map.on("click", this._showForm.bind(this));
+  }
+
+  _showForm(mapE) {
+    this.#mapEvent = mapE;
+    form.classList.remove("hidden");
+    inputDistance.focus();
+  }
+
+  _toggleElevationField() {
+    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
+  }
+
+  _newWorkout(e) {
     e.preventDefault();
 
     // Clear input fields
-    inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = '';
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        "";
 
     // Display Marker
-    console.log(mapEvent);
-    const { lat, lng } = mapEvent.latlng;
+    console.log(this.#mapEvent);
+    const { lat, lng } = this.#mapEvent.latlng;
 
     L.marker([lat, lng])
-      .addTo(map)
+      .addTo(this.#map)
       .bindPopup(
         L.popup({
           maxWidth: 250,
@@ -76,11 +104,7 @@ if (navigator.geolocation) {
       )
       .setPopupContent("Workout")
       .openPopup();
-  });
-
-  // Toggles between input elevation and input cadence
-  inputType.addEventListener('change', function(){
-    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
-    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-  });
+  }
 }
+
+const app = new App();
